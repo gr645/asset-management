@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Submit Asset Request</h2>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-warning">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="asset_type" class="form-label">Asset Type</label>
+                        <select class="form-select" id="asset_type" name="asset_type" required>
+                            <option value="">Select Asset Type</option>
+                            {% for asset in available_asset_types %}
+                                <option value="{{ asset }}">{{ asset }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="justification" class="form-label">Justification</label>
+                        <textarea class="form-control" id="justification" name="justification" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

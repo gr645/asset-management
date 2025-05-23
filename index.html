@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-4">Welcome to Asset Management System</h1>
+        <p class="lead mb-4">
+            A comprehensive platform for managing asset requests and approvals.
+            Submit your asset requirements and track their status in real-time.
+        </p>
+        {% if not current_user.is_authenticated %}
+            <div class="d-grid gap-2 col-md-6 mx-auto">
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg" style="background-color: #33148a; border-color: #33148a;">Login to Get Started</a>
+            </div>
+        {% else %}
+            <div class="d-grid gap-2 col-md-6 mx-auto">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg" style="background-color: #33148a; border-color: #33148a;">Go to Dashboard</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

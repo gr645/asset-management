@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Manage Inventory</h2>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-info">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Add/Update Inventory</h5>
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                <label for="asset_type" class="form-label">Asset Type</label>
+                                <input type="text" class="form-control" id="asset_type" name="asset_type" required>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                <label for="total" class="form-label">Total Quantity</label>
+                                <input type="number" class="form-control" id="total" name="total" min="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary w-100" style="background-color: #33148a; border-color: #33148a;">Update</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Current Inventory</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Asset Type</th>
+                                <th>Total Quantity</th>
+                                <th>Available</th>
+                                <th>Allocated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in inventory %}
+                                <tr>
+                                    <td>{{ item.asset_type }}</td>
+                                    <td>{{ item.total }}</td>
+                                    <td>{{ get_available_inventory(item.asset_type) }}</td>
+                                    <td>{{ item.total - get_available_inventory(item.asset_type) }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

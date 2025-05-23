@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">{% if current_user.is_admin %}Asset Requests Dashboard{% else %}My Asset Requests{% endif %}</h2>
+
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Requests</h5>
+                        <p class="card-text h3">{{ total_requests }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Pending Requests</h5>
+                        <p class="card-text h3">{{ pending_requests }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Approved Requests</h5>
+                        <p class="card-text h3">{{ approved_requests }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Disapproved Requests</h5>
+                        <p class="card-text h3">{{ disapproved_requests }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Requests Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Recent Activity (Requests)</h5>
+                <ul class="list-group list-group-flush">
+                    {% if recent_requests %}
+                        {% for request in recent_requests %}
+                            <li class="list-group-item">
+                                Request for <strong>{{ request.asset_type }}</strong> by {{ request.username }} ({{ request.department }}) - Status: {{ request.status }}
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="list-group-item">No recent requests.</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        {% if current_user.is_admin %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Inventory Status</h5>
+                <div class="row">
+                    {% for asset_type, available in inventory_status.items() %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ asset_type }}</h6>
+                                    <p class="card-text mb-1">
+                                        <strong>Available:</strong> 
+                                        <span class="badge {% if available > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ available }}
+                                        </span>
+                                    </p>
+                                    {% set total = get_inventory_total(asset_type) %}
+                                    {% set allocated = total - available %}
+                                    <p class="card-text">
+                                        <strong>Allocated:</strong> 
+                                        <span class="badge {% if allocated > 0 %}bg-warning{% else %}bg-secondary{% endif %}">
+                                            {{ allocated }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <a href="{{ url_for('manage_inventory') }}" class="btn btn-primary mt-3" style="background-color: #33148a; border-color: #33148a;">Manage Inventory</a>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- All Requests Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                 <h5 class="card-title">{% if current_user.is_admin %}All Asset Requests{% else %}My Submitted Requests{% endif %}</h5>
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('generate_report') }}" class="btn btn-secondary mb-3" style="background-color: #33148a; border-color: #33148a;">Generate Report</a>
+                {% endif %}
+                {% if requests %}
+                    {% for request in requests %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h5 class="card-title">Asset Request #{{ request._id }}</h5>
+                                        <p class="card-text">
+                                            <strong>Requested By:</strong> {{ request.username }}<br>
+                                            <strong>Department:</strong> {{ request.department }}<br>
+                                            <strong>Asset Type:</strong> {{ request.asset_type }}
+                                            {% if current_user.is_admin and request.asset_type in inventory_status%}
+                                            <span class="badge {% if inventory_status[request.asset_type] > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                                {{ inventory_status[request.asset_type] }} available
+                                            </span>
+                                            {% endif %}<br>
+                                            <strong>Justification:</strong> {{ request.justification }}<br>
+                                            <strong>Status:</strong> 
+                                            <span class="badge {% if request.status == 'Approved' %}bg-success{% elif request.status == 'Disapproved' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                {{ request.status }}
+                                            </span><br>
+                                            <strong>Submitted:</strong> {{ request.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                        </p>
+                                        {% if request.admin_comment %}
+                                            <p class="card-text">
+                                                <strong>Admin Comment:</strong> {{ request.admin_comment }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                    {% if current_user.is_admin and request.status == 'Pending' %}
+                                        <div class="col-md-4">
+                                            <form method="POST" action="{{ url_for('review_request', request_id=request._id) }}">
+                                                <div class="mb-3">
+                                                    <label for="admin_comment" class="form-label">Admin Comment</label>
+                                                    <textarea class="form-control" id="admin_comment" name="admin_comment" rows="3"></textarea>
+                                                </div>
+                                                <div class="d-grid gap-2">
+                                                    <button type="submit" name="action" value="approve" class="btn btn-success" {% if request.asset_type in inventory_status and inventory_status[request.asset_type] <= 0 %}disabled{% endif %}>Approve</button>
+                                                    <button type="submit" name="action" value="disapprove" class="btn btn-danger">Disapprove</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        {% if current_user.is_admin %}
+                            No asset requests have been submitted yet.
+                        {% else %}
+                            You haven't submitted any asset requests yet.
+                            <a href="{{ url_for('submit_request') }}" class="alert-link">Submit your first request</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

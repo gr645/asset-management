@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+ 
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            transition: .3s ease-in-out;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 320px;
+        }
+ 
+        .form:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+ 
+        .heading {
+            margin: 0;
+            color: #333;
+            padding-bottom: 1em;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.5em;
+        }
+ 
+        .input {
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            background-color: #f9f9f9;
+            outline: none;
+            padding: 12px;
+            transition: .3s ease-in-out;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+ 
+        .input:hover {
+            border-color: #d0d0d0;
+            background-color: #f5f5f5;
+        }
+ 
+        .input:focus {
+            background: #ffffff;
+            border-color: #33148a;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+ 
+        .form .btn {
+            margin-top: 1.5em;
+            align-self: center;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: .3s ease-in-out;
+            width: 100%;
+            background-color: #33148a;
+            cursor: pointer;
+            font-size: 14px;
+        }
+ 
+        .form .btn:hover {
+            background-color: #ab9ae6;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2);
+        }
+ 
+        .form .btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+ 
+        .form select {
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            background-color: #f9f9f9;
+            outline: none;
+            padding: 12px;
+            transition: .3s ease-in-out;
+            width: 100%;
+            font-size: 14px;
+        }
+ 
+        .form select:hover {
+            border-color: #d0d0d0;
+            background-color: #f5f5f5;
+        }
+ 
+        .signup-section {
+            display: none;
+        }
+ 
+        .signup-section.active {
+            display: block;
+        }
+ 
+        .login-section.hidden {
+            display: none;
+        }
+ 
+        .message {
+            text-align: center;
+            margin-bottom: 1em;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+ 
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+ 
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+ 
+        .admin-login {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+ 
+        .admin-login a {
+            color: #33148a;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+ 
+        .admin-login a:hover {
+            text-decoration: underline;
+        }
+ 
+        .admin-form {
+            display: none;
+        }
+ 
+        .navbar {
+            background-color: #33148a;
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+ 
+        .navbar-brand {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+ 
+        body {
+            padding-top: 80px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="navbar-brand">Asset Management System</a>
+    </nav>
+ 
+    <div class="form">
+        <div id="message-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="message {{ 'error-message' if category == 'error' else 'success-message' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+       
+        <div class="login-section">
+            <p class="heading">Login</p>
+            <form method="POST" action="{{ url_for('login') }}">
+                <input class="input" name="username" placeholder="Username" type="text" required>
+                <input class="input" name="password" placeholder="Password" type="password" required>
+                <div class="btn-group">
+                    <button type="submit" class="btn">Login</button>
+                    <button type="button" class="btn" onclick="toggleSignup()">Sign Up</button>
+                </div>
+            </form>
+            <div class="admin-login">
+                <a onclick="toggleAdminLogin()">Admin Login</a>
+            </div>
+        </div>
+ 
+        <div class="admin-form">
+            <p class="heading">Admin Login</p>
+            <form method="POST" action="{{ url_for('login') }}">
+                <input type="hidden" name="is_admin" value="true">
+                <input class="input" name="username" placeholder="Admin Username" type="text" required>
+                <input class="input" name="password" placeholder="Admin Password" type="password" required>
+                <div class="btn-group">
+                    <button type="submit" class="btn">Login as Admin</button>
+                    <button type="button" class="btn" onclick="toggleAdminLogin()">Back to User Login</button>
+                </div>
+            </form>
+        </div>
+ 
+        <div class="signup-section" style="display: none;">
+            <p class="heading">Sign Up</p>
+            <form method="POST" action="{{ url_for('register') }}">
+                <input class="input" name="username" placeholder="Username" type="text" required>
+                <input class="input" name="email" placeholder="Email" type="email" required>
+                <input class="input" name="password" placeholder="Password" type="password" required>
+                <select class="input" name="department" required>
+                    <option value="" disabled selected>Select Department</option>
+                    <option value="Gold">Gold</option>
+                    <option value="IT">IT</option>
+                    <option value="Sales">Sales</option>
+                    <option value="HR">HR</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Marketing">Marketing</option>
+                </select>
+                <div class="btn-group">
+                    <button type="submit" class="btn">Sign Up</button>
+                    <button type="button" class="btn" onclick="toggleSignup()">Back to Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+ 
+    <script>
+        function toggleSignup() {
+            const loginSection = document.querySelector('.login-section');
+            const signupSection = document.querySelector('.signup-section');
+            const adminForm = document.querySelector('.admin-form');
+           
+            if (signupSection.style.display === 'none') {
+                signupSection.style.display = 'block';
+                loginSection.style.display = 'none';
+                adminForm.style.display = 'none';
+            } else {
+                signupSection.style.display = 'none';
+                loginSection.style.display = 'block';
+                adminForm.style.display = 'none';
+            }
+        }
+       
+        function toggleAdminLogin() {
+            const loginSection = document.querySelector('.login-section');
+            const adminForm = document.querySelector('.admin-form');
+            const signupSection = document.querySelector('.signup-section');
+           
+            if (adminForm.style.display === 'none') {
+                adminForm.style.display = 'block';
+                loginSection.style.display = 'none';
+                signupSection.style.display = 'none';
+            } else {
+                adminForm.style.display = 'none';
+                loginSection.style.display = 'block';
+                signupSection.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html> 
